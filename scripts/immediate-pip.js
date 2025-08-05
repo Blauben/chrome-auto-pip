@@ -30,7 +30,6 @@ async function immediatelyRequestPiP() {
     // Find any video that can support PiP (both playing and paused for manual activation)
     const videos = Array.from(document.querySelectorAll('video'))
         .filter(video => video.readyState >= 2)
-        .filter(video => video.disablePictureInPicture == false)
         .filter(video => {
             // For manual activation, include both playing and paused videos
             const isPlaying = video.currentTime > 0 && !video.paused && !video.ended;
@@ -56,7 +55,7 @@ async function immediatelyRequestPiP() {
         });
 
     if (videos.length === 0) {
-        console.log("❌ No suitable videos found for manual PiP");
+        console.log("❌ No suitable videos found for manual PiP on frame");
         return false;
     }
 

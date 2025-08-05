@@ -3,7 +3,7 @@ function getVideos() {
   console.log("=== PIP getVideos() START ===");
 
   const allVideos = Array.from(document.querySelectorAll('video'));
-  console.log(`Found ${allVideos.length} video elements on page`);
+  console.log(`Found ${allVideos.length} video elements in frame on page`);
 
   allVideos.forEach((video, index) => {
     console.log(`Video ${index}:`, {
@@ -21,11 +21,6 @@ function getVideos() {
     .filter(video => {
       const pass = video.readyState >= 2;
       console.log(`Video readyState filter (>=2): ${pass} (readyState: ${video.readyState})`);
-      return pass;
-    })
-    .filter(video => {
-      const pass = video.disablePictureInPicture == false;
-      console.log(`Video PiP enabled filter: ${pass} (disablePictureInPicture: ${video.disablePictureInPicture})`);
       return pass;
     })
     .filter(video => {
@@ -159,7 +154,7 @@ function setupAutoPiPSupport() {
   console.log("getVideos() result:", video);
 
   if (!video) {
-    console.log("No video found, returning false");
+    console.log("No video found in frame, returning false");
     return false;
   }
 

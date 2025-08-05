@@ -3,7 +3,7 @@ function hasPlayingVideo() {
   console.log("=== VIDEO DETECTION START ===");
 
   const allVideos = Array.from(document.querySelectorAll('video'));
-  console.log(`Found ${allVideos.length} video elements on page`);
+  console.log(`Found ${allVideos.length} video elements in a frame on page`);
 
   allVideos.forEach((video, index) => {
     console.log(`Video ${index}:`, {
@@ -24,11 +24,6 @@ function hasPlayingVideo() {
       // More lenient readyState check - allow videos that are still loading metadata
       const pass = video.readyState >= 1; // HAVE_METADATA or higher
       console.log(`Video readyState filter (>=1): ${pass} (readyState: ${video.readyState})`);
-      return pass;
-    })
-    .filter(video => {
-      const pass = video.disablePictureInPicture == false;
-      console.log(`Video PiP enabled filter: ${pass} (disablePictureInPicture: ${video.disablePictureInPicture})`);
       return pass;
     })
     .filter(video => {
