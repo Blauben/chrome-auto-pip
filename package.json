@@ -1,0 +1,24 @@
+{
+  "name": "chrome-auto-pip",
+  "version": "1.0.0",
+  "description": "Automatically enables Picture-in-Picture when switching tabs like Arc or Firefox or Zen.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Blauben/chrome-auto-pip.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Blauben/chrome-auto-pip/issues"
+  },
+  "homepage": "https://github.com/Blauben/chrome-auto-pip#readme",
+  "dependencies": {
+    "vite": "^7.0.6"
+  }
+}

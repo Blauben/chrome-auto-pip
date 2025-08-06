@@ -1,7 +1,6 @@
 function checkpip() {
   const videos = Array.from(document.querySelectorAll('video'))
     .filter(video => video.readyState >= 2) // HAVE_CURRENT_DATA or higher (ready to play)
-    .filter(video => video.disablePictureInPicture == false)
     .filter(video => {
       // Check if video is currently playing OR if it's ready to play and not explicitly paused
       const isPlaying = video.currentTime > 0 && !video.paused && !video.ended;

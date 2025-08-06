@@ -4,14 +4,15 @@
   "version": "1.0.0",
   "manifest_version": 3,
   "icons": {
-    "128": "assets/icon.png"
+    "128": "icon.png"
   },
   "background": {
-    "service_worker": "main.js"
+    "service_worker": "service-worker.js",
+    "type": "module"
   },
   "action": {
     "default_title": "Picture-in-Picture",
-    "default_icon": "assets/icon.png"
+    "default_icon": "icon.png"
   },
   "options_ui": {
     "page": "options.html",
@@ -26,14 +27,11 @@
   "host_permissions": [
     "<all_urls>"
   ],
-  "web_accessible_resources": [
+  "content_scripts": [
     {
-      "resources": [
-        "assets/*"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "type": "module"
     }
   ],
   "minimum_chrome_version": "134",
