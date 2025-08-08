@@ -6,7 +6,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         content: resolve(__dirname, 'src/tab_script.js'),
-        'service-worker': resolve(__dirname, 'src/service-worker.js')
+        'service-worker': resolve(__dirname, 'src/service-worker.js'),
       },
       output: {
         entryFileNames: '[name].js'

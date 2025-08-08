@@ -1,4 +1,4 @@
 export const MessageCodes = {
     RequestPip: 0,
-    IsPipActive: 1
+    ExitPipInTab: 1
 }

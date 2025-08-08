@@ -1,5 +1,7 @@
+// courtesy of apotenza92 [GitHub, accessed 09.08.2025](https://github.com/apotenza92/chrome-auto-pip)
+
 // --- [ FUNCTION: Get Video ] --- //
-function getVideos() {
+export function getVideos() {
   console.log("=== PIP getVideos() START ===");
 
   const allVideos = Array.from(document.querySelectorAll('video'));
@@ -49,11 +51,11 @@ function getVideos() {
   console.log("=== PIP getVideos() END ===");
 
   if (videos.length === 0) return null;
-  return videos[0];
+  return videos;
 }
 
 // --- [ FUNCTION: Req PiP Player ] --- //
-async function requestPictureInPicture(video) {
+export async function requestPictureInPicture(video) {
   console.log("requestPictureInPicture called with video:", {
     paused: video.paused,
     readyState: video.readyState,
@@ -103,91 +105,16 @@ function maybeUpdatePictureInPictureVideo(entries, observer) {
 }
 
 // --- [ FUNCTION: Exit PiP ] --- //
-function exitPictureInPicture() {
+export function exitPictureInPicture() {
   try {
-    if (!document.pictureInPictureElement) return false;
+    if (!isPipPlayingInWindow) return false;
     document.exitPictureInPicture().then(() => { })
   }
   catch (error) { }
   return true;
 }
 
-// --- [ FUNCTION: Setup MediaSession for Auto-PiP ] --- //
-function setupAutoPiPSupport() {
-  try {
-    // Register MediaSession action handler for automatic PiP
-    navigator.mediaSession.setActionHandler("enterpictureinpicture", async () => {
-      console.log("Auto-PiP triggered by MediaSession API");
-      const video = getVideos();
-      if (video) {
-        // Don't start paused videos - respect user's pause action
-        if (video.paused) {
-          console.log("Video is paused - skipping auto-PiP");
-          return false;
-        }
-
-        // Request PiP - only for playing videos
-        await video.requestPictureInPicture();
-        video.setAttribute('__pip__', true);
-        video.addEventListener('leavepictureinpicture', event => {
-          video.removeAttribute('__pip__');
-        }, { once: true });
-        new ResizeObserver(maybeUpdatePictureInPictureVideo).observe(video);
-        return true;
-      }
-    });
-
-    console.log("MediaSession auto-PiP support registered");
-    return true;
-  } catch (error) {
-    console.log("MediaSession enterpictureinpicture action not supported:", error);
-    return false;
-  }
+// --- [ FUNCTION: PiP Active Query ] --- //
+export function isPipPlayingInWindow() {
+  return document.pictureInPictureElement
 }
-
-// --- [ EXECUTE ] --- //
-(async () => {
-  console.log("=== PIP SCRIPT START ===");
-
-  // Get Video
-  const video = getVideos();
-  console.log("getVideos() result:", video);
-
-  if (!video) {
-    console.log("No video found in frame, returning false");
-    return false;
-  }
-
-  console.log("Video found:", {
-    tagName: video.tagName,
-    readyState: video.readyState,
-    currentTime: video.currentTime,
-    paused: video.paused,
-    duration: video.duration,
-    hasPipAttribute: video.hasAttribute('__pip__')
-  });
-
-  // Setup MediaSession for automatic PiP (Chrome 134+)
-  const autoPiPSupported = setupAutoPiPSupport();
-  if (autoPiPSupported) {
-    console.log("Auto-PiP will be available via MediaSession API");
-  }
-
-  // Exit PiP (if already in PiP)
-  if (video.hasAttribute('__pip__')) {
-    console.log("Video already in PiP, exiting PiP");
-    exitPictureInPicture();
-    return "Exit";
-  }
-
-  // Request PiP (fallback for older Chrome versions)
-  console.log("Requesting PiP...");
-  try {
-    const pipResult = await requestPictureInPicture(video);
-    console.log("PiP request result:", pipResult);
-    return pipResult;
-  } catch (error) {
-    console.error("PiP request failed:", error);
-    return false;
-  }
-})()
