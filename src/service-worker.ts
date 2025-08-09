@@ -1,11 +1,12 @@
-//import { MessageCodes } from "./model/definitions";
+//import { MessageCodes } from "./model/definitions"
+const MessageCodes = {
+    RequestPip: 0,
+    ExitPipInTab: 1,
+    TabActivated: 2
+}
 
 var currentTab = 0;
-var prevTab = null;
-var targetTab = null;
-var pipActiveTab = null; // Track which tab has active PiP
 var autoPipEnabled = true; // Default to enabled
-var log = []
 
 async function init() {
   await initServiceWorkerState()
@@ -19,7 +20,7 @@ async function init() {
 
 async function initServiceWorkerState() {
   let tab = await chrome.tabs.query({ active: true, lastFocusedWindow: true })
-  currentTab = tab?.[0]?.id
+  currentTab = tab?.[0]?.id ?? 0
 }
 
 // Helper function to check if a URL is restricted (chrome://, chrome-extension://, etc.)
@@ -41,7 +42,6 @@ async function loadSettings() {
   }
 }
 
-// storage changes?
 
 function safeExecuteScriptAllFrames(tabId, files, callback) {
   // First check if the tab exists and get its URL
@@ -88,32 +88,26 @@ function setupListeners() {
 
   });
 
-  // message received from content scripts
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    MessageReceived(message, sender, sendResponse)
-    return true;
-  }
-  );
-
   // user switched to new tab
   chrome.tabs.onActivated.addListener(async (activeInfo) => {
     if (currentTab === null || currentTab === 0)
       return
-    
-    try {
-      await chrome.tabs.sendMessage(currentTab, {"code": 0})
-      currentTab = activeInfo.tabId
-    } catch (error) {
-      console.log(`Could not send message to tab ${currentTab}:`, error.message);
-    }
+
+    await sendMessageToTab(activeInfo.tabId, { "code": MessageCodes.ExitPipInTab })
+    await sendMessageToTab(activeInfo.tabId, {"code": MessageCodes.TabActivated})
+    await sendMessageToTab(currentTab, { "code": MessageCodes.RequestPip })
 
     currentTab = activeInfo.tabId
   }
   );
 }
 
-function MessageReceived({ code, message }, sender, sendResponse) {
-  console.log(`${sender.tab.id}: Message with code ${code} received: ${message}`)
+async function sendMessageToTab(tabId: number, message: object) {
+  try {
+    await chrome.tabs.sendMessage(tabId, message)
+  } catch (error) {
+    console.log(`Could not send message to tab ${currentTab}:`, error.message);
+  }
 }
 
 init()

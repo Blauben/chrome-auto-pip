@@ -1,7 +1,7 @@
 // courtesy of apotenza92 [GitHub, accessed 09.08.2025](https://github.com/apotenza92/chrome-auto-pip)
 
 // --- [ FUNCTION: Get Video ] --- //
-export function getVideos() {
+export function getVideos(): HTMLVideoElement[] {
   console.log("=== PIP getVideos() START ===");
 
   const allVideos = Array.from(document.querySelectorAll('video'));
@@ -19,7 +19,7 @@ export function getVideos() {
     });
   });
 
-  const videos = allVideos
+  const videos: HTMLVideoElement[] = allVideos
     .filter(video => {
       const pass = video.readyState >= 2;
       console.log(`Video readyState filter (>=2): ${pass} (readyState: ${video.readyState})`);
@@ -50,12 +50,12 @@ export function getVideos() {
   console.log(`Final filtered videos count: ${videos.length}`);
   console.log("=== PIP getVideos() END ===");
 
-  if (videos.length === 0) return null;
+  if (videos.length === 0) return [];
   return videos;
 }
 
 // --- [ FUNCTION: Req PiP Player ] --- //
-export async function requestPictureInPicture(video) {
+export async function requestPictureInPicture(video: HTMLVideoElement) {
   console.log("requestPictureInPicture called with video:", {
     paused: video.paused,
     readyState: video.readyState,
@@ -67,12 +67,16 @@ export async function requestPictureInPicture(video) {
     console.log("Video is paused - skipping PiP (respecting user's pause action)");
     return false;
   }
+  if (isPipPlayingInWindow()) {
+    console.log("PiP is already active in the current document!")
+    return false;
+  }
 
   console.log("Attempting to request Picture-in-Picture...");
   try {
     await video.requestPictureInPicture();
     console.log("Picture-in-Picture request successful");
-    video.setAttribute('__pip__', true);
+    video.setAttribute('__pip__', "");
     video.addEventListener('leavepictureinpicture', event => {
       video.removeAttribute('__pip__');
       console.log("Left Picture-in-Picture mode");
@@ -82,7 +86,8 @@ export async function requestPictureInPicture(video) {
   } catch (error) {
     if (error.name === 'NotAllowedError') {
       console.log("PiP requires user gesture - will show prompt on current tab");
-      return 'user_gesture_required';
+      showActivationPrompt()
+      return false;
     } else {
       console.error("Picture-in-Picture request failed:", error);
       return false;
@@ -92,15 +97,15 @@ export async function requestPictureInPicture(video) {
 
 // --- [ FUNCTION: Update PiP Video ] --- //
 function maybeUpdatePictureInPictureVideo(entries, observer) {
-  const observedVideo = entries[0].target;
-  if (!document.querySelector('[__pip__]')) {
-    observer.unobserve(observedVideo);
-    return "Update";
-  }
-  const video = getVideos();
-  if (video && !video.hasAttribute('__pip__')) {
-    observer.unobserve(observedVideo);
-    requestPictureInPicture(video);
+  for (let observedVideo of entries.map(entry => entry.target)) {
+    if (!document.querySelector('[__pip__]')) {
+      observer.unobserve(observedVideo);
+      return "Update";
+    }
+    if (observedVideo && !observedVideo.hasAttribute('__pip__')) {
+      observer.unobserve(observedVideo);
+      requestPictureInPicture(observedVideo);
+    }
   }
 }
 
@@ -117,4 +122,9 @@ export function exitPictureInPicture() {
 // --- [ FUNCTION: PiP Active Query ] --- //
 export function isPipPlayingInWindow() {
   return document.pictureInPictureElement
+}
+
+function showActivationPrompt() {
+  // Show UI hint that user needs to interact
+  
 }
